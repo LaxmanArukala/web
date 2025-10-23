@@ -1,81 +1,44 @@
 import React, { useState } from 'react';
 import { Search, Calendar, User, ArrowRight, Filter } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import{ getAllBlogs} from '../services/blogsService'
+import { useQuery } from '@tanstack/react-query';
+import { BlogResponse} from '../models/blogModel'
+import{Box, CircularProgress}  from "@mui/material"
 
 const BlogPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const categories = ['All', 'Criminal Law', 'Corporate Law', 'Family Law', 'Real Estate', 'Personal Injury'];
+ 
+  const {
+    data: blogPosts,
+    isLoading,
+    error,
+  } = useQuery<BlogResponse, Error>({
+    queryKey: ["blogs"],
+    queryFn: getAllBlogs,
+  });
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Understanding Your Rights in Criminal Defense Cases",
-      excerpt: "A comprehensive guide to navigating criminal defense proceedings and understanding your constitutional rights.",
-      author: "Sarah Johnson",
-      date: "2024-01-15",
-      category: "Criminal Law",
-      readTime: "8 min read",
-      image: "https://images.pexels.com/photos/5668882/pexels-photo-5668882.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 2,
-      title: "Corporate Compliance in the Digital Age",
-      excerpt: "How modern businesses can ensure regulatory compliance while embracing digital transformation.",
-      author: "Michael Chen",
-      date: "2024-01-12",
-      category: "Corporate Law",
-      readTime: "6 min read",
-      image: "https://images.pexels.com/photos/7681107/pexels-photo-7681107.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 3,
-      title: "Family Law Mediation: A Better Path Forward",
-      excerpt: "Exploring alternative dispute resolution methods in family law cases for better outcomes.",
-      author: "Emily Davis",
-      date: "2024-01-10",
-      category: "Family Law",
-      readTime: "7 min read",
-      image: "https://images.pexels.com/photos/5696114/pexels-photo-5696114.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 4,
-      title: "Real Estate Transactions: Common Legal Pitfalls",
-      excerpt: "Key legal considerations and common mistakes to avoid in real estate deals.",
-      author: "David Wilson",
-      date: "2024-01-08",
-      category: "Real Estate",
-      readTime: "9 min read",
-      image: "https://images.pexels.com/photos/5669630/pexels-photo-5669630.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 5,
-      title: "Personal Injury Claims: What You Need to Know",
-      excerpt: "Understanding the personal injury claim process and maximizing your compensation.",
-      author: "Lisa Rodriguez",
-      date: "2024-01-05",
-      category: "Personal Injury",
-      readTime: "5 min read",
-      image: "https://images.pexels.com/photos/6077359/pexels-photo-6077359.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-      id: 6,
-      title: "Intellectual Property Protection Strategies",
-      excerpt: "Comprehensive guide to protecting your intellectual property in today's competitive market.",
-      author: "Robert Kim",
-      date: "2024-01-03",
-      category: "Corporate Law",
-      readTime: "10 min read",
-      image: "https://images.pexels.com/photos/7648047/pexels-photo-7648047.jpeg?auto=compress&cs=tinysrgb&w=800"
+  if(isLoading){
+    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+      <CircularProgress size={60}/>
+    </Box>
+  }
+  if(error){
+      <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+         <p>Error Fetching Blog Data</p>
+      </Box>
     }
-  ];
-
-  const filteredPosts = blogPosts.filter(post => {
+  const filteredPosts = blogPosts?.data?.data?.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+ 
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -127,11 +90,11 @@ const BlogPage = () => {
       {/* Blog Posts Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post) => (
+          {filteredPosts?.map((post) => (
             <article key={post.id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
               <div className="relative overflow-hidden">
                 <img
-                  src={post.image}
+                  src={post.image || "https://images.pexels.com/photos/5668882/pexels-photo-5668882.jpeg?auto=compress&cs=tinysrgb&w=800"}
                   alt={post.title}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -144,7 +107,7 @@ const BlogPage = () => {
               
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                  {post.title}
+                  <Link to={`/blog-detail/${post.id}`}>{post.title}</Link>
                 </h2>
                 <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
                 
@@ -159,18 +122,18 @@ const BlogPage = () => {
                       {new Date(post.date).toLocaleDateString()}
                     </div>
                   </div>
-                  <span className="text-blue-600 font-medium">{post.readTime}</span>
+                  <span className="text-blue-600 font-medium">{post.read_time}</span>
                 </div>
                 
-                <button className="flex items-center text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                <Link to={`/blog-detail/${post.id}`} className="flex items-center text-blue-600 font-medium hover:text-blue-700 transition-colors">
                   Read More <ArrowRight className="ml-1 h-4 w-4" />
-                </button>
+                </Link>
               </div>
             </article>
           ))}
         </div>
 
-        {filteredPosts.length === 0 && (
+        {filteredPosts?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No articles found matching your criteria.</p>
           </div>
