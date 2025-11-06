@@ -21,15 +21,25 @@ const BlogPage = () => {
     queryFn: getAllBlogs,
   });
 
-  if(isLoading){
-    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-      <CircularProgress size={60}/>
-    </Box>
-  }
-  if(error){
-      <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-         <p>Error Fetching Blog Data</p>
-      </Box>
+  if (isLoading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="flex flex-col items-center space-y-3">
+            <CircularProgress color="primary" size={48} thickness={4} />
+            <p className="text-gray-600 font-medium">Loading lawyers...</p>
+          </div>
+        </div>
+      );
+    }
+  
+    if (error) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <p className="text-red-600 font-medium">
+            Failed to load lawyers. Please try again later.
+          </p>
+        </div>
+      );
     }
   const filteredPosts = blogPosts?.data?.data?.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

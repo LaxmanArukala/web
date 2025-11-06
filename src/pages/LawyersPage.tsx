@@ -1,124 +1,121 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Star, Calendar, Filter, Award, Clock, Phone } from 'lucide-react';
-
+import React, { useState } from "react";
+import {
+  Search,
+  MapPin,
+  Star,
+  
+  Filter,
+  Award,
+  Clock,
+  Phone,
+  Eye,
+} from "lucide-react";
+import { getAllLawyers } from "../services/lawyersService";
+import {  LawyerResponse } from "../models/lawyersModel";
+import { useQuery } from "@tanstack/react-query";
+import { CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 const LawyersPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("All");
+  const [selectedLocation, setSelectedLocation] = useState("All");
 
-  const specialties = ['All', 'Criminal Law', 'Corporate Law', 'Family Law', 'Real Estate', 'Personal Injury', 'Immigration'];
-  const locations = ['All', 'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia'];
-
-  const lawyers = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      specialty: "Criminal Law",
-      location: "New York",
-      rating: 4.9,
-      reviews: 127,
-      experience: 15,
-      image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Specialized in criminal defense with over 15 years of experience. Former prosecutor with extensive trial experience.",
-      hourlyRate: 450,
-      languages: ["English", "Spanish"],
-      education: "Harvard Law School",
-      achievements: ["Top 100 Criminal Defense Attorneys", "ABA Recognition"]
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      specialty: "Corporate Law",
-      location: "Los Angeles",
-      rating: 4.8,
-      reviews: 89,
-      experience: 12,
-      image: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Expert in corporate transactions, mergers & acquisitions, and business formation with Fortune 500 experience.",
-      hourlyRate: 525,
-      languages: ["English", "Mandarin"],
-      education: "Stanford Law School",
-      achievements: ["Chambers & Partners Ranked", "Super Lawyers Recognition"]
-    },
-    {
-      id: 3,
-      name: "Emily Davis",
-      specialty: "Family Law",
-      location: "Chicago",
-      rating: 4.9,
-      reviews: 156,
-      experience: 10,
-      image: "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Compassionate family law attorney specializing in divorce, custody, and adoption cases.",
-      hourlyRate: 350,
-      languages: ["English"],
-      education: "University of Chicago Law School",
-      achievements: ["Best Family Lawyer Award", "Client Choice Award"]
-    },
-    {
-      id: 4,
-      name: "David Wilson",
-      specialty: "Real Estate",
-      location: "Houston",
-      rating: 4.7,
-      reviews: 93,
-      experience: 18,
-      image: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Experienced real estate attorney handling commercial and residential transactions, zoning, and development.",
-      hourlyRate: 400,
-      languages: ["English"],
-      education: "University of Texas Law School",
-      achievements: ["Real Estate Attorney of the Year", "Texas Bar Recognition"]
-    },
-    {
-      id: 5,
-      name: "Lisa Rodriguez",
-      specialty: "Personal Injury",
-      location: "Phoenix",
-      rating: 4.8,
-      reviews: 134,
-      experience: 14,
-      image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Dedicated personal injury attorney with a track record of securing substantial settlements for clients.",
-      hourlyRate: 375,
-      languages: ["English", "Spanish"],
-      education: "Arizona State University Law School",
-      achievements: ["Million Dollar Advocates Forum", "AVVO Top Rating"]
-    },
-    {
-      id: 6,
-      name: "Robert Kim",
-      specialty: "Immigration",
-      location: "Philadelphia",
-      rating: 4.9,
-      reviews: 78,
-      experience: 11,
-      image: "https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400",
-      bio: "Immigration law expert helping individuals and businesses navigate complex immigration processes.",
-      hourlyRate: 325,
-      languages: ["English", "Korean", "Spanish"],
-      education: "University of Pennsylvania Law School",
-      achievements: ["Immigration Law Specialist", "AILA Recognition"]
-    }
+  const navigate = useNavigate()
+  const specialties = [
+    "All",
+    "Criminal Law",
+    "Corporate Law",
+    "Family Law",
+    "Real Estate",
+    "Personal Injury",
+    "Immigration",
+  ];
+  const locations = [
+    "All",
+    "New York",
+    "Los Angeles",
+    "Chicago",
+    "Houston",
+    "Phoenix",
+    "Philadelphia",
   ];
 
-  const filteredLawyers = lawyers.filter(lawyer => {
-    const matchesSearch = lawyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lawyer.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSpecialty = selectedSpecialty === 'All' || lawyer.specialty === selectedSpecialty;
-    const matchesLocation = selectedLocation === 'All' || lawyer.location === selectedLocation;
-    return matchesSearch && matchesSpecialty && matchesLocation;
+  // ========== Getting Lawyer List ==============
+  const {
+    data: allLawyers,
+    isLoading,
+    error,
+  } = useQuery<LawyerResponse, Error>({
+    queryKey: ["AllLawyers", selectedSpecialty, selectedLocation],
+    queryFn: getAllLawyers,
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-3">
+          <CircularProgress color="primary" size={48} thickness={4} />
+          <p className="text-gray-600 font-medium">Loading lawyers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-red-600 font-medium">
+          Failed to load lawyers. Please try again later.
+        </p>
+      </div>
+    );
+  }
+  // ========== Getting Lawyer List ==============
+  // ========== Filtering Lawyer List ==============
+  const filteredLawyers = allLawyers?.data?.data?.filter((lawyer: any) => {
+    const specArray = Array.isArray(lawyer?.specilization)
+      ? lawyer.specilization
+      : lawyer?.specilization
+      ? [lawyer.specilization]
+      : [];
+
+    const name = lawyer?.name || lawyer?.full_name || ""; // fallback if `name` missing
+    const search = searchTerm?.toLowerCase() || "";
+
+    const matchesSearch =
+      name.toLowerCase().includes(search) ||
+      specArray.some((spec: string) => spec.toLowerCase().includes(search));
+
+    const matchesSpecialty =
+      selectedSpecialty === "All" ||
+      specArray.some(
+        (spec: string) => spec.toLowerCase() === selectedSpecialty.toLowerCase()
+      );
+
+    const matchesLocation =
+      selectedLocation === "All" ||
+      lawyer?.location?.toLowerCase() === selectedLocation.toLowerCase();
+
+    return matchesSearch && matchesSpecialty && matchesLocation;
+  });
+  // ========== Filtering Lawyer List ==============
+  // ========== Navigating to Details ==============
+  const navigateToDetails = (item: any) => {
+    navigate(`/lawyers/${item.id}`)
+  };
+  // ========== Navigating to Details ==============
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Find Expert Lawyers</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Find Expert Lawyers
+            </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Connect with qualified legal professionals for online consultations and expert advice
+              Connect with qualified legal professionals for online
+              consultations and expert advice
             </p>
           </div>
         </div>
@@ -149,8 +146,10 @@ const LawyersPage = () => {
                   onChange={(e) => setSelectedSpecialty(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  {specialties.map(specialty => (
-                    <option key={specialty} value={specialty}>{specialty}</option>
+                  {specialties.map((specialty) => (
+                    <option key={specialty} value={specialty}>
+                      {specialty}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -162,8 +161,10 @@ const LawyersPage = () => {
                   onChange={(e) => setSelectedLocation(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  {locations.map(location => (
-                    <option key={location} value={location}>{location}</option>
+                  {locations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -175,20 +176,29 @@ const LawyersPage = () => {
       {/* Lawyers Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {filteredLawyers.map((lawyer) => (
-            <div key={lawyer.id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+          {filteredLawyers?.map((lawyer: any) => (
+            <div
+              key={lawyer.id}
+              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+            >
               <div className="p-6">
                 <div className="flex items-start space-x-4">
                   <img
-                    src={lawyer.image}
-                    alt={lawyer.name}
+                    src={lawyer.image || ""}
+                    alt={lawyer.first_name}
                     className="w-20 h-20 rounded-full object-cover"
                   />
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">{lawyer.name}</h3>
-                        <p className="text-blue-600 font-medium">{lawyer.specialty}</p>
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {lawyer.first_name} {lawyer.last_name}
+                        </h3>
+                        {lawyer.specilization.length > 0 && (
+                          <p className="text-blue-600 font-medium">
+                            {lawyer.specilization.join(",")}
+                          </p>
+                        )}
                         <div className="flex items-center text-gray-500 text-sm mt-1">
                           <MapPin className="h-4 w-4 mr-1" />
                           {lawyer.location}
@@ -197,8 +207,12 @@ const LawyersPage = () => {
                       <div className="text-right">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-amber-400 fill-current" />
-                          <span className="ml-1 font-medium">{lawyer.rating}</span>
-                          <span className="text-gray-500 text-sm ml-1">({lawyer.reviews})</span>
+                          <span className="ml-1 font-medium">
+                            {lawyer.rating}
+                          </span>
+                          <span className="text-gray-500 text-sm ml-1">
+                            ({lawyer.reviews ?? 0})
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -214,24 +228,39 @@ const LawyersPage = () => {
                   </div>
                   <div className="flex items-center text-gray-600">
                     <Award className="h-4 w-4 mr-1" />
-                    {lawyer.education}
+                    {lawyer.qualification}
                   </div>
                   <div className="text-blue-600 font-semibold">
-                    ${lawyer.hourlyRate}/hour
+                    ₹{lawyer.pricing}/hour
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <div className="text-sm text-gray-600 mb-2">Languages: {lawyer.languages.join(', ')}</div>
-                  <div className="text-sm text-gray-600">
-                    Achievements: {lawyer.achievements.join(', ')}
+                  <div className="text-sm text-gray-600 mb-2">
+                    Languages: {lawyer.languages.join(", ")}
                   </div>
+                  {/* <div className="text-sm text-gray-600">
+                    Achievements: {lawyer.achievements.join(', ')}
+                  </div> */}
+                </div>
+                <div className="mt-4">
+                  <div className="text-sm text-blue-600 mb-2">
+                    Category: {lawyer.category.join(", ")}
+                  </div>
+                  {/* <div className="text-sm text-gray-600">
+                    Achievements: {lawyer.achievements.join(', ')}
+                  </div> */}
                 </div>
 
                 <div className="flex gap-3 mt-6">
-                  <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Consultation
+                  <button
+                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    onClick={() => {
+                      navigateToDetails(lawyer);
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details about {lawyer.first_name}
                   </button>
                   <button className="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center">
                     <Phone className="h-4 w-4 mr-2" />
@@ -243,9 +272,11 @@ const LawyersPage = () => {
           ))}
         </div>
 
-        {filteredLawyers.length === 0 && (
+        {filteredLawyers?.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No lawyers found matching your criteria.</p>
+            <p className="text-gray-500 text-lg">
+              No lawyers found matching your criteria.
+            </p>
           </div>
         )}
       </div>

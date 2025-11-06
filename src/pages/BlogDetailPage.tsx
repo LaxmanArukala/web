@@ -1,48 +1,56 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  ArrowUp, 
-  ArrowDown, 
-  MessageCircle, 
-  User, 
-  Clock, 
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  MessageCircle,
+  User,
+  Clock,
   Heart,
   Reply,
   Flag,
   Share2,
   Bookmark,
-  Award
-} from 'lucide-react';
-import { BlogResponse, BlogResponseByID } from '../models/blogModel';
-import { useQuery } from '@tanstack/react-query';
-import { getBlogById } from '../services/blogsService';
-import { Box, CircularProgress } from '@mui/material';
-
+  Award,
+} from "lucide-react";
+import { BlogResponse, BlogResponseByID } from "../models/blogModel";
+import { useQuery } from "@tanstack/react-query";
+import { getBlogById } from "../services/blogsService";
+import { Box, CircularProgress } from "@mui/material";
 
 const BlogDetailsPage = () => {
   const { id } = useParams();
 
   const {
-  data: blogPost,
-  isLoading,
-  error,
-} = useQuery<BlogResponseByID, Error>({
-  queryKey: ["blogById", id], // ✅ include id in query key
-  queryFn: () => getBlogById(Number(id)), // ✅ pass a function, not its result
-  enabled: !!id, // ✅ optional: only run when id is defined
-});
+    data: blogPost,
+    isLoading,
+    error,
+  } = useQuery<BlogResponseByID, Error>({
+    queryKey: ["blogById", id], // ✅ include id in query key
+    queryFn: () => getBlogById(Number(id)), // ✅ pass a function, not its result
+    enabled: !!id, // ✅ optional: only run when id is defined
+  });
 
-if(isLoading){
-    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-      <CircularProgress size={60}/>
-    </Box>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-3">
+          <CircularProgress color="primary" size={48} thickness={4} />
+          <p className="text-gray-600 font-medium">Loading lawyers...</p>
+        </div>
+      </div>
+    );
   }
 
-  if(error){
-    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-       <p>Error Fetching Blog Data</p>
-    </Box>
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-red-600 font-medium">
+          Failed to load lawyers. Please try again later.
+        </p>
+      </div>
+    );
   }
 
   // Mock discussion data
@@ -69,18 +77,16 @@ Any advice would be greatly appreciated. I want to be prepared if this situation
     replies: 8,
     tags: ["rights", "interrogation", "criminal-defense", "miranda-rights"],
     isAnswered: true,
-    isSolved: true
+    isSolved: true,
   };
 
- 
-  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back Navigation */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link 
-            to="/blog" 
+          <Link
+            to="/blog"
             className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
@@ -116,7 +122,9 @@ Any advice would be greatly appreciated. I want to be prepared if this situation
                 </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">{blogPost?.data?.data?.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                {blogPost?.data?.data?.title}
+              </h1>
 
               <div className="flex items-center space-x-4 text-sm text-gray-500 mb-6">
                 <div className="flex items-center">
@@ -125,7 +133,9 @@ Any advice would be greatly appreciated. I want to be prepared if this situation
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
-                  {new Date(blogPost?.data?.data?.date ?? "").toLocaleDateString()}
+                  {new Date(
+                    blogPost?.data?.data?.date ?? ""
+                  ).toLocaleDateString()}
                 </div>
                 <div>{discussion.views} views</div>
                 {/* <div className="flex items-center">
@@ -138,14 +148,17 @@ Any advice would be greatly appreciated. I want to be prepared if this situation
                 {/* {discussion.content.split('\n\n').map((paragraph, index) => (
                   <p key={index} className="mb-4">{paragraph}</p>
                 ))} */}
-                <p className='mb-3'>{blogPost?.data?.data?.description}</p>
+                <p className="mb-3">{blogPost?.data?.data?.description}</p>
                 <p>{blogPost?.data?.data?.excerpt}</p>
               </div>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {discussion.tags.map((tag, index) => (
-                  <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                  <span
+                    key={index}
+                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  >
                     #{tag}
                   </span>
                 ))}
