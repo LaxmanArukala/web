@@ -21,6 +21,7 @@ import { LawyerResponse, LawyerResponseById } from "../models/lawyersModel";
 import { getLawyerById } from "../services/lawyersService";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumbs, CircularProgress, Typography } from "@mui/material";
+import BreadcrumbsNav from "../components/BreadCrumb";
 
 const LawyerDetailsPage = () => {
   const { id } = useParams();
@@ -152,18 +153,13 @@ const LawyerDetailsPage = () => {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Lawyers
           </Link> */}
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link to="/" color="inherit" >
-              Home
-            </Link>
-            <Link
-              color="inherit"
-              to="/lawyers"
-            >
-              All Lawyers
-            </Link>
-            <Typography sx={{ color: 'text.primary' }}>{lawyerResponse?.data?.data?.first_name}</Typography>
-          </Breadcrumbs>
+          <BreadcrumbsNav
+            items={[
+              { label: "Home", to: "/" },
+              { label: "All Lawyers", to: "/lawyers" },
+              { label: lawyerResponse?.data?.data?.first_name || "Lawyer Details" },
+            ]}
+          />
         </div>
       </div>
 

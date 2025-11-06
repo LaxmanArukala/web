@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Scale, Menu, X, Search } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Scale, Menu, X, Search, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth()
 
   const navItems = [
     { path: '/', label: 'Home' },
@@ -15,6 +19,10 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+   const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
@@ -44,12 +52,36 @@ const Header = () => {
           {/* Search and CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Search className="h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
-            <Link
-              to="/lawyers"
+            {/* <Link
+              to="/login"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              Book Consultation
-            </Link>
+              Login / Signup
+            </Link> */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/user/dashboard"
+                  className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <User size={16} /> Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+                >
+                  <LogOut size={16} /> Logout
+                </button>
+              </div>
+            ) : (
+              // ❌ If user is NOT logged in
+              <Link
+                to="/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Login / Signup
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -77,13 +109,34 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                to="/lawyers"
-                onClick={() => setIsMenuOpen(false)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors w-fit"
-              >
-                Book Consultation
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/user/dashboard"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors w-fit flex items-center gap-2"
+                  >
+                    <User size={16} /> Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors w-fit flex items-center gap-2"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors w-fit"
+                >
+                  Login / Signup
+                </Link>
+              )}
             </nav>
           </div>
         )}

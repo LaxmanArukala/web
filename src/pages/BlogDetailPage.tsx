@@ -18,6 +18,7 @@ import { BlogResponse, BlogResponseByID } from "../models/blogModel";
 import { useQuery } from "@tanstack/react-query";
 import { getBlogById } from "../services/blogsService";
 import { Box, CircularProgress } from "@mui/material";
+import BreadcrumbsNav from "../components/BreadCrumb";
 
 const BlogDetailsPage = () => {
   const { id } = useParams();
@@ -85,13 +86,13 @@ Any advice would be greatly appreciated. I want to be prepared if this situation
       {/* Back Navigation */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            to="/blog"
-            className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Blogs
-          </Link>
+          <BreadcrumbsNav
+            items={[
+              { label: "Home", to: "/" },
+              { label: "All Blogs", to: "/blog" },
+              { label: blogPost?.data?.data?.title || "Blog Details" },
+            ]}
+          />
         </div>
       </div>
 
